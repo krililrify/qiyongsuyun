@@ -638,10 +638,10 @@
       </div>
     </div>
     <nav class="main-nav">
-      <a href="#flow">迁移流程</a>
-      <a href="#compensation">补偿方案</a>
-      <a href="#login">登录说明</a>
-      <a href="#faq">常见问题</a>
+      <a href="#flow" data-nav-scroll="flow">迁移流程</a>
+      <a href="#compensation" data-nav-scroll="compensation">补偿方案</a>
+      <a href="#login" data-nav-scroll="login">登录说明</a>
+      <a href="#faq" data-nav-scroll="faq">常见问题</a>
     </nav>
     <div class="header-actions">
       <button class="btn btn-primary" id="btn-goto-oldsite-header">提交迁移工单 →</button>
@@ -1040,7 +1040,7 @@
      以后只需修改 OLD_SITE_URL，页面所有「进入原站」按钮
      会自动使用这个新地址，无需在其他地方手动查找替换。
      ========================================================== */
-  const OLD_SITE_URL = "这里填写老站地址";
+  const OLD_SITE_URL = "https://skjdsheuhfeesfjdosfrvjsq1.2015010.xyz/";
   /* 新站地址不在页面中公开展示，迁移完成后由客服在工单回复中告知，
      因此本页面不设置 NEW_SITE_URL，也不提供「前往新站」按钮。 */
 
@@ -1068,15 +1068,35 @@
   ].forEach(function (id) { bindGoto(id, OLD_SITE_URL); });
 
   /* ==========================================================
-     三、平滑滚动到迁移流程
+     三、平滑滚动
+     导航锚点统一改为 JS 滚动，不写入 URL 的 # 片段，
+     这样刷新或再次打开页面时都会从顶部开始，
+     不会因为地址栏残留 #faq 等锚点而自动跳到对应区域。
      ========================================================== */
+  function scrollToSection(id) {
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   const scrollFlowBtn = document.getElementById("btn-scroll-flow");
   if (scrollFlowBtn) {
-    scrollFlowBtn.addEventListener("click", function () {
-      const target = document.getElementById("flow");
-      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    scrollFlowBtn.addEventListener("click", function () { scrollToSection("flow"); });
   }
+
+  document.querySelectorAll("[data-nav-scroll]").forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      scrollToSection(link.getAttribute("data-nav-scroll"));
+    });
+  });
+
+  /* 页面加载时始终从顶部开始，避免浏览器根据地址栏中残留的
+     #flow / #compensation / #login / #faq 等锚点自动跳转定位 */
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+  window.scrollTo(0, 0);
+  window.addEventListener("load", function () { window.scrollTo(0, 0); });
 
   /* ==========================================================
      四、弹窗系统
